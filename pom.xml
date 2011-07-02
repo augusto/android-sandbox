@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <project xmlns="http://maven.apache.org/POM/4.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                               http://maven.apache.org/maven-v4_0_0.xsd">
+      <modelVersion>4.0.0</modelVersion>
+      <groupId>org.example</groupId>
+      <artifactId>my-media-player</artifactId>
+      <version>0.1-SNAPSHOT</version>
+      <packaging>apk</packaging>
+      <name>MyMydiaPlayer</name>
+
+      <dependencies>
+          <dependency>
+              <groupId>com.google.android</groupId>
+              <artifactId>android</artifactId>
+              <version>2.1_r1</version>
+			  <scope>provided</scope>
+          </dependency>
+      </dependencies>
+
+      <build>
+          <sourceDirectory>src</sourceDirectory>
+          <plugins>
+              <plugin>
+                  <groupId>
+                    com.jayway.maven.plugins.android.generation2
+                  </groupId>
+                  <artifactId>maven-android-plugin</artifactId>
+                  <version>2.8.3</version>
+                  <configuration>
+                      <sdk>
+                          <platform>2.1</platform>
+                      </sdk>
+                      <deleteConflictingFiles>
+                        true
+                      </deleteConflictingFiles>
+                  </configuration>
+                  <extensions>true</extensions>
+              </plugin>
+              <plugin>
+                  <artifactId>maven-compiler-plugin</artifactId>
+				  <version>2.3.2</version>
+                  <configuration>
+                      <source>1.5</source>
+                      <target>1.5</target>
+                  </configuration>
+              </plugin>
+          </plugins>
+      </build>
+  </project>
