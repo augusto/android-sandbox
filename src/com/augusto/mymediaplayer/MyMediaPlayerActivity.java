@@ -1,28 +1,23 @@
 package com.augusto.mymediaplayer;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import android.app.Activity;
+import android.app.TabActivity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
-import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MyMediaPlayerActivity extends Activity 
+public class MyMediaPlayerActivity extends TabActivity 
 implements OnCompletionListener {
     private static String TAG="MyMediaPlayer";
     private MediaPlayer mediaPlayer = null;
@@ -33,12 +28,42 @@ implements OnCompletionListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-        textView = (TextView) findViewById(R.id.list);
+        setContentView(R.layout.tabs);
         
-        getAlbums();
+        Resources res = getResources(); // Resource object to get Drawables
+        TabHost tabHost = getTabHost();  // The activity TabHost
+        TabHost.TabSpec spec;  // Resusable TabSpec for each tab
+        Intent intent;  // Reusable Intent for each tab
+
+        // Create an Intent to launch an Activity for the tab (to be reused)
+        intent = new Intent().setClass(this, PlaylistActivity.class);
         
-        this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        // Initialize a TabSpec for each tab and add it to the TabHost
+        spec = tabHost.newTabSpec("artists").setIndicator("Playlist",
+                          res.getDrawable(R.drawable.ic_tab_artists))
+                      .setContent(intent);
+        tabHost.addTab(spec);
+        
+        
+        // Create an Intent to launch an Activity for the tab (to be reused)
+        intent = new Intent().setClass(this, BrowseActivity.class);
+        
+        // Initialize a TabSpec for each tab and add it to the TabHost
+        spec = tabHost.newTabSpec("browse").setIndicator("Browse",
+                          res.getDrawable(R.drawable.ic_tab_artists))
+                      .setContent(intent);
+        tabHost.addTab(spec);
+        
+        tabHost.setCurrentTab(0);
+        
+        
+//        textView = (TextView) findViewById(R.id.list);
+        
+        
+        
+//        getAlbums();
+        
+//        this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 
     }
     
@@ -124,22 +149,22 @@ implements OnCompletionListener {
         super.onPause();
     }
     
-    private BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(final Context context, Intent intent) {
-            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
-            int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 0);
-            Log.i(TAG, "level: " + level + "; scale: " + scale);
-            int percent = (level*100)/scale;
-            
-            final String text = String.valueOf(percent) + "%";
-            handler.post( new Runnable() {
-                
-                public void run() {
-                    Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
-                }
-            });
-            
-        }
-    };
+//    private BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(final Context context, Intent intent) {
+//            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+//            int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 0);
+//            Log.i(TAG, "level: " + level + "; scale: " + scale);
+//            int percent = (level*100)/scale;
+//            
+//            final String text = String.valueOf(percent) + "%";
+//            handler.post( new Runnable() {
+//                
+//                public void run() {
+//                    Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+//                }
+//            });
+//            
+//        }
+//    };
 }
