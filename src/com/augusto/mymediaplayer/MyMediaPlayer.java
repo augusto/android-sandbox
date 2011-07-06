@@ -17,7 +17,7 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MyMediaPlayerActivity extends TabActivity 
+public class MyMediaPlayer extends TabActivity 
 implements OnCompletionListener {
     private static String TAG="MyMediaPlayer";
     private MediaPlayer mediaPlayer = null;

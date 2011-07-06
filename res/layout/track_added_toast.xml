@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/track_added_toast"
+    android:background="@android:drawable/toast_frame"
+	android:layout_width="fill_parent" 
+	android:layout_height="fill_parent"
+	android:orientation="vertical"
+	android:minWidth="100dip"
+	android:minHeight="40dip">
+  <TextView
+    android:text="Added"
+    android:textColor="@android:color/primary_text_dark"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:textAppearance="?android:attr/textAppearanceMedium" />
+  <View
+    android:layout_width="fill_parent"
+    android:layout_height="1dip"
+    android:background="@android:color/white" />
+  <TextView
+    android:id="@+id/artist"
+    android:textColor="@android:color/primary_text_dark"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:textAppearance="?android:attr/textAppearanceMedium" />
+  <TextView
+    android:id="@+id/title"
+    android:textColor="@android:color/primary_text_dark" 
+    android:shadowColor="#BB000000"
+    android:shadowRadius="2.75"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:textAppearance="?android:attr/textAppearanceLarge" /><!--
+    android:textAppearance="@style/TextAppearance.Small"
+  --><TextView
+    android:id="@+id/duration"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:textColor="@android:color/secondary_text_dark"
+    android:textAppearance="?android:attr/textAppearanceSmall" />
+</LinearLayout>

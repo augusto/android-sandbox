@@ -9,6 +9,7 @@ import android.net.Uri;
 public class Track {
 
     private final int id;
+    private String artist;
     private String title;
     private int trackNumber;
     private int duration;
@@ -22,7 +23,7 @@ public class Track {
     public int getId() {
         return id;
     }
-
+    
     public String getTitle() {
         return title;
     }
@@ -73,5 +74,18 @@ public class Track {
 
     public Uri asUri() {
         return Uri.fromFile(new File(path));
+    }
+
+    public void setArtist(String artist) {
+        this.artist = artist;
+    }
+
+    public String getArtist() {
+        return artist;
+    }
+    
+    @Override
+    public String toString() {
+        return path;
     }
 }
