@@ -11,6 +11,7 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.augusto.mymediaplayer.model.Track;
 
@@ -21,7 +22,8 @@ public class AudioPlayer extends Service implements OnCompletionListener {
     private MediaPlayer mediaPlayer;
 
     public class AudioPlayerBinder extends Binder {
-        AudioPlayer getService() {
+        public AudioPlayer getService() {
+            Log.v(TAG, "AudioPlayerBinder: getService() called");
             return AudioPlayer.this;
         }
     }
@@ -30,12 +32,46 @@ public class AudioPlayer extends Service implements OnCompletionListener {
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.v(TAG, "AudioPlayer: onBind() called");
         return audioPlayerBinder;
     }
-
     
+    @Override
+    public void onCreate() {
+        Log.v(TAG, "AudioPlayer: onCreate() called");
+    }
+
+    @Override
+    public void onStart(Intent intent, int startId) {
+        Log.i(TAG, "AudioPlayer: onStart() called");
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.i(TAG, "AudioPlayer: onDestroy() called");
+     
+        release();
+    }
+
+    public void onCompletion(MediaPlayer _mediaPlayer) {
+        release();
+        nextTrack();
+    }
+    
+    private void release() {
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+        }
+        mediaPlayer.release();
+        mediaPlayer = null;
+    }
+
     public void addTrack(Track track) {
+        Log.d(TAG, "addTrack " + track);
         tracks.add(track);
+        if( tracks.size() == 1) {
+            play();
+        }
     }
     
     public void jumpToTrackPosition(int position) {
@@ -57,51 +93,34 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         
         Track track = tracks.get(0);
 
-        if( mediaPlayer.isPlaying() ) {
-            mediaPlayer.stop();
+        if( mediaPlayer != null ) {
+            release();
         }
         
         try {
+            mediaPlayer = new MediaPlayer();
             mediaPlayer.setDataSource(this, track.asUri());
             mediaPlayer.prepare();
             mediaPlayer.start();
+            mediaPlayer.setOnCompletionListener(this);
         } catch (IOException ioe) {
             Log.e(TAG,"error trying to play " + track , ioe);
+            String message = "error trying to play track: " + track + ".\nError: " + ioe.getMessage();
+            Toast.makeText(this, message, Toast.LENGTH_LONG);
         }
     }
-
-
-    @Override
-    public void onCreate() {
-        Log.v("PLAYERSERVICE", "onCreate");
-
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setOnCompletionListener(this);
-    }
-
-    @Override
-    public void onStart(Intent intent, int startId) {
-        Log.i(TAG, "Service onStart called");
-    }
-    
-    public void onDestroy() {
-        Log.i(TAG, "Service onDestroy called");
-        
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
-        }
-        mediaPlayer.release();
-        Log.v("SIMPLESERVICE", "onDestroy");
-    }
-
-    public void onCompletion(MediaPlayer _mediaPlayer) {
-        nextTrack();
-    }
-
 
     private void nextTrack() {
         tracks.remove(0);
         play();
-        
+    }
+
+    public Track[] getQueuedTracks() {
+        Track[] tracksArray = new Track[tracks.size()];
+        return tracks.toArray(tracksArray);
+    }
+
+    public void stop() {
+        release();
     }
 }

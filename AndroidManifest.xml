@@ -13,9 +13,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PlaylistActivity"/>
+        <activity android:name=".PlayQueueActivity"/>
         <activity android:name=".BrowseActivity"/>
-        
         <service android:name=".services.AudioPlayer"></service>
+        
     </application>
 </manifest>
