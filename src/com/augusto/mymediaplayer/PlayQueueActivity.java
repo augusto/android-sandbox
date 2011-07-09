@@ -6,8 +6,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -42,6 +44,8 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
     private View nonEmptyQueueView;
     private UpdateCurrentTrackTask updateCurrentTrackTask;
     
+    private BroadcastReceiver audioPlayerBroadcastReceiver = new AudioPlayerBroadCastReceiver();
+    
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.play_queue);
@@ -72,6 +76,9 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
 
     @Override
     protected void onPause() {
+        unregisterReceiver(audioPlayerBroadcastReceiver);
+        audioPlayerBroadcastReceiver = null;
+        
         updateCurrentTrackTask.stop();
         updateCurrentTrackTask = null;
         super.onPause();
@@ -79,6 +86,10 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
     
     @Override
     protected void onResume() {
+        audioPlayerBroadcastReceiver = new AudioPlayerBroadCastReceiver();
+        IntentFilter filter = new IntentFilter(AudioPlayer.UPDATE_PLAYLIST);
+        registerReceiver(audioPlayerBroadcastReceiver, filter );
+        
         refreshScreen();
         super.onResume();
     }
@@ -180,6 +191,8 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         updatePlayPauseButtonState();
     }
 
+    
+    
     private void updatePlayPauseButtonState() {
         if( audioPlayer().isPlaying() ) {
             playPause.setText(R.string.pause);
@@ -236,6 +249,17 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
             int seconds = (duration%60000)/1000;
             
             return numberFormat.format(minutes) + ":" + numberFormat.format(seconds);
+        }
+    }
+    
+    private class AudioPlayerBroadCastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG,"AudioPlayerBroadCastReceiver.onReceive action=" + intent.getAction());
+            if( AudioPlayer.UPDATE_PLAYLIST.equals( intent.getAction())) {
+                updatePlayQueue();
+            }
         }
     }
 }

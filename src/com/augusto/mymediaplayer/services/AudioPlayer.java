@@ -19,6 +19,8 @@ import com.augusto.mymediaplayer.R;
 import com.augusto.mymediaplayer.model.Track;
 
 public class AudioPlayer extends Service implements OnCompletionListener {
+    public static final String UPDATE_PLAYLIST = "com.augusto.mymediaplayer.AudioPlayer.PLAYLIST_UPDATED";
+
     private final String TAG = "AudioPlayer";
 
     private List<Track> tracks = new ArrayList<Track>();
@@ -99,6 +101,7 @@ public class AudioPlayer extends Service implements OnCompletionListener {
     }
     
     public void play() {
+        playListUpdated();
         if( tracks.size() == 0) {
             return;
         }
@@ -124,6 +127,11 @@ public class AudioPlayer extends Service implements OnCompletionListener {
             String message = "error trying to play track: " + track + ".\nError: " + ioe.getMessage();
             Toast.makeText(this, message, Toast.LENGTH_LONG);
         }
+    }
+
+    private void playListUpdated() {
+        Intent updatePlaylistIntent = new Intent(UPDATE_PLAYLIST);
+        this.sendBroadcast(updatePlaylistIntent);
     }
 
     private void nextTrack() {
