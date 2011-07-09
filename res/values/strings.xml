@@ -3,6 +3,10 @@
     <string name="hello">Hello World, MyMediaPlayerActivity!</string>
     <string name="app_name">MyMediaPlayer</string>
     
+    
     <string name="play">play</string>
+    <string name="pause">pause</string>
+    <string name="stop">stop</string>
     <string name="queue">queue</string>
+    <string name="close">close</string>
 </resources>

@@ -20,6 +20,7 @@ public class AudioPlayer extends Service implements OnCompletionListener {
 
     private List<Track> tracks = new ArrayList<Track>();
     private MediaPlayer mediaPlayer;
+    private boolean paused = false;
 
     public class AudioPlayerBinder extends Binder {
         public AudioPlayer getService() {
@@ -59,6 +60,10 @@ public class AudioPlayer extends Service implements OnCompletionListener {
     }
     
     private void release() {
+        if( mediaPlayer == null) {
+            return;
+        }
+        
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
         }
@@ -94,14 +99,18 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         play();
     }
     
-    private void play() {
+    public void play() {
         if( tracks.size() == 0) {
             return;
         }
         
         Track track = tracks.get(0);
 
-        if( mediaPlayer != null ) {
+        if( mediaPlayer != null && paused) {
+            mediaPlayer.start();
+            paused = false;
+            return;
+        } else if( mediaPlayer != null ) {
             release();
         }
         
@@ -130,5 +139,19 @@ public class AudioPlayer extends Service implements OnCompletionListener {
 
     public void stop() {
         release();
+    }
+
+    public boolean isPlaying() {
+        if(tracks.isEmpty() || mediaPlayer == null) {
+            return false;
+        }
+        return mediaPlayer.isPlaying();
+    }
+
+    public void pause() {
+        if( mediaPlayer != null) {
+            mediaPlayer.pause();
+            paused = true;
+        }
     }
 }

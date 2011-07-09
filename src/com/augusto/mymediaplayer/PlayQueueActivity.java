@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.augusto.mymediaplayer.model.Track;
+import com.augusto.mymediaplayer.services.AudioPlayer;
 
 public class PlayQueueActivity extends Activity implements OnClickListener {
     private static String TAG="PlayQueueActivity";
@@ -27,6 +28,7 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
     private TextView message;
     private Button stop;
     private Button close;
+    private Button playPause;
     private View nonEmptyQueueView;
     
     public void onCreate(Bundle savedInstanceState) {
@@ -39,16 +41,19 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         nonEmptyQueueView = (View)findViewById(R.id.playqueue_not_empty);
         stop = (Button)findViewById(R.id.stop);
         close = (Button)findViewById(R.id.close);
+        playPause = (Button)findViewById(R.id.playPause);
         
         stop.setOnClickListener(this);
         close.setOnClickListener(this);
+        playPause.setOnClickListener(this);
 
-        if( MyMediaPlayer.getAudioPlayer() == null) {
+        if( audioPlayer() == null) {
             updateScreenAsync();
         } else {
             updatePlayQueue();
         }
             
+        updatePlayPauseButtonState();
     }
     
     private void updateScreenAsync() {
@@ -56,7 +61,7 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
             
             public void run() {
                 Log.d(TAG,"updateScreenAsync running timmer");
-                if( MyMediaPlayer.getAudioPlayer() != null) {
+                if( audioPlayer() != null) {
                     timer.cancel();
                     handler.post( new Runnable() {
                         public void run() {
@@ -69,7 +74,7 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
     }
 
     public void updatePlayQueue() {
-        Track[] queuedTracks = MyMediaPlayer.getAudioPlayer().getQueuedTracks();
+        Track[] queuedTracks = audioPlayer().getQueuedTracks();
         Log.d(TAG,"Queuedtracks (number): " + queuedTracks.length);
         
         if( queuedTracks.length == 0) {
@@ -88,12 +93,38 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
     
     public void onClick(View v) {
         switch(v.getId()) {
+        case R.id.playPause:
+            onClickPlayPause();
+            break;
         case R.id.stop:
-            MyMediaPlayer.getAudioPlayer().stop();
+            audioPlayer().stop();
+            updatePlayPauseButtonState();
             break;
         case R.id.close:
             finish();
             break;
         }
+    }
+
+    private void onClickPlayPause() {
+        if( audioPlayer().isPlaying() ) {
+            audioPlayer().pause();
+        } else {
+            audioPlayer().play();
+        }
+
+        updatePlayPauseButtonState();
+    }
+
+    private void updatePlayPauseButtonState() {
+        if( audioPlayer().isPlaying() ) {
+            playPause.setText(R.string.pause);
+        } else {
+            playPause.setText(R.string.play);
+        }
+    }
+
+    private AudioPlayer audioPlayer() {
+        return MyMediaPlayer.getAudioPlayer();
     }
 }
