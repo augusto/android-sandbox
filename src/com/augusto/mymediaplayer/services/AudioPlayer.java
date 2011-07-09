@@ -79,19 +79,6 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         }
     }
     
-    public void jumpToTrackPosition(int position) {
-        if( position == 0) {
-            return;
-        }
-        
-        for( int i=0 ; i<position ; i++) {
-            tracks.remove(0);
-        }
-        
-        play();
-    }
-
-
     public void play(Track track) {
         stop();
         tracks.clear();
@@ -153,5 +140,20 @@ public class AudioPlayer extends Service implements OnCompletionListener {
             mediaPlayer.pause();
             paused = true;
         }
+    }
+
+    public Track getCurrentTrack() {
+        if (tracks.isEmpty()) {
+            return null;
+        }
+        
+        return tracks.get(0);
+    }
+
+    public int elapsed() {
+        if (mediaPlayer == null) {
+            return 0;
+        }
+        return mediaPlayer.getCurrentPosition();
     }
 }

@@ -1,10 +1,13 @@
 package com.augusto.mymediaplayer;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -22,14 +25,16 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
     private static String TAG="PlayQueueActivity";
     static final int UPDATE_INTERVAL = 300;
     private LayoutInflater layoutInflater;
-    private Timer timer = new Timer();
+    private Timer waitForAudioPlayertimer = new Timer();
     private Handler handler = new Handler();
     private ListView queue;
     private TextView message;
+    private TextView elapsed;
     private Button stop;
     private Button close;
     private Button playPause;
     private View nonEmptyQueueView;
+    private UpdateCurrentTrackTask updateCurrentTrackTask;
     
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,6 +42,7 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         layoutInflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         
         message = (TextView)findViewById(R.id.message);
+        elapsed = (TextView)findViewById(R.id.elapsed);
         queue = (ListView)findViewById(R.id.play_queue);
         nonEmptyQueueView = (View)findViewById(R.id.playqueue_not_empty);
         stop = (Button)findViewById(R.id.stop);
@@ -52,17 +58,21 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         } else {
             updatePlayQueue();
         }
-            
-        updatePlayPauseButtonState();
+    }
+
+    @Override
+    protected void onDestroy() {
+        updateCurrentTrackTask.stop();
+        super.onDestroy();
     }
     
     private void updateScreenAsync() {
-        timer.scheduleAtFixedRate( new TimerTask() {
+        waitForAudioPlayertimer.scheduleAtFixedRate( new TimerTask() {
             
             public void run() {
                 Log.d(TAG,"updateScreenAsync running timmer");
                 if( audioPlayer() != null) {
-                    timer.cancel();
+                    waitForAudioPlayertimer.cancel();
                     handler.post( new Runnable() {
                         public void run() {
                             updatePlayQueue();
@@ -88,7 +98,10 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
             nonEmptyQueueView.setVisibility(View.VISIBLE);
         }
         
-        Log.d(TAG,"please do refresh!!!");
+        updatePlayPauseButtonState();
+        
+        updateCurrentTrackTask = new UpdateCurrentTrackTask();
+        updateCurrentTrackTask.execute();
     }
     
     public void onClick(View v) {
@@ -126,5 +139,43 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
 
     private AudioPlayer audioPlayer() {
         return MyMediaPlayer.getAudioPlayer();
+    }
+    
+    private class UpdateCurrentTrackTask extends AsyncTask<Void, Track, Void> {
+
+        public boolean stopped = false;
+        
+        @Override
+        protected Void doInBackground(Void... params) {
+            while( ! stopped ) {
+                Track currentTrack = audioPlayer().getCurrentTrack();
+                if( currentTrack != null ) {
+                    publishProgress(currentTrack);
+                }
+                try {
+                    Thread.sleep(250);
+                } catch (InterruptedException e) { }
+            }
+            
+            return null;
+        }
+        
+        @Override
+        protected void onProgressUpdate(Track... track) {
+            String message = track[0].getTitle() + " - " + getDurationAsMinsSecs(audioPlayer().elapsed()); 
+            PlayQueueActivity.this.elapsed.setText(message);
+        }
+
+        public void stop() {
+            stopped = true;
+        }
+        
+        NumberFormat numberFormat = new DecimalFormat("00");
+        public String getDurationAsMinsSecs(int duration) {
+            int minutes = duration/60000;
+            int seconds = (duration%60000)/1000;
+            
+            return numberFormat.format(minutes) + ":" + numberFormat.format(seconds);
+        }
     }
 }

@@ -35,6 +35,13 @@
               android:paddingTop="20dip"
               android:textAppearance="?android:attr/textAppearanceLarge"
               android:text="Loading ..."/>
+              
+    <TextView android:id="@+id/elapsed"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:gravity="center_horizontal"
+              android:textAppearance="?android:attr/textAppearanceMedium"
+              android:text="Nothing yet"/>
 
     <LinearLayout
         android:id="@+id/playqueue_not_empty"
