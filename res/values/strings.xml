@@ -2,4 +2,7 @@
 <resources>
     <string name="hello">Hello World, MyMediaPlayerActivity!</string>
     <string name="app_name">MyMediaPlayer</string>
+    
+    <string name="play">play</string>
+    <string name="queue">queue</string>
 </resources>

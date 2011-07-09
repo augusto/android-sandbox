@@ -85,6 +85,14 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         
         play();
     }
+
+
+    public void play(Track track) {
+        stop();
+        tracks.clear();
+        tracks.add(track);
+        play();
+    }
     
     private void play() {
         if( tracks.size() == 0) {
