@@ -23,7 +23,7 @@ import com.augusto.mymediaplayer.services.AudioPlayer;
 
 public class PlayQueueActivity extends Activity implements OnClickListener {
     private static String TAG="PlayQueueActivity";
-    static final int UPDATE_INTERVAL = 300;
+    static final int UPDATE_INTERVAL = 250;
     private LayoutInflater layoutInflater;
     private Timer waitForAudioPlayertimer = new Timer();
     private Handler handler = new Handler();
@@ -53,6 +53,9 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         close.setOnClickListener(this);
         playPause.setOnClickListener(this);
 
+    }
+
+    private void refreshScreen() {
         if( audioPlayer() == null) {
             updateScreenAsync();
         } else {
@@ -61,8 +64,21 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onPause() {
         updateCurrentTrackTask.stop();
+        updateCurrentTrackTask = null;
+        super.onPause();
+    }
+    
+    @Override
+    protected void onResume() {
+        refreshScreen();
+        super.onResume();
+    }
+    
+    @Override
+    protected void onDestroy() {
+        
         super.onDestroy();
     }
     
@@ -100,8 +116,12 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         
         updatePlayPauseButtonState();
         
-        updateCurrentTrackTask = new UpdateCurrentTrackTask();
-        updateCurrentTrackTask.execute();
+        if( updateCurrentTrackTask == null) {
+            updateCurrentTrackTask = new UpdateCurrentTrackTask();
+            updateCurrentTrackTask.execute();
+        } else {
+            Log.e(TAG, "updateCurrentTrackTask is not null" );
+        }
     }
     
     public void onClick(View v) {
@@ -154,8 +174,11 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
                 }
                 try {
                     Thread.sleep(250);
+                    Log.d(TAG,"AsyncTask sleep");
                 } catch (InterruptedException e) { }
             }
+            
+            Log.d(TAG,"AsyncTask stopped");
             
             return null;
         }
