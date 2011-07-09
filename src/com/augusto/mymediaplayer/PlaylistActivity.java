@@ -1,7 +1,6 @@
 package com.augusto.mymediaplayer;
 
 import android.app.Activity;
-import android.app.ListActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 

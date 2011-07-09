@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/clear_all"
+          android:icon="@drawable/ic_tab_artists_grey"
+          android:title="@string/clear_all" />
+    <item android:id="@+id/exit"
+          android:icon="@drawable/ic_tab_artists_white"
+          android:title="@string/exit" />
+</menu>

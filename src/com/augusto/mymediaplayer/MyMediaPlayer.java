@@ -6,21 +6,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.widget.TabHost;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.augusto.mymediaplayer.services.AudioPlayer;
 
 public class MyMediaPlayer extends TabActivity {
     private static String TAG="MyMediaPlayer";
-    private TextView textView;
-    private Handler handler = new Handler();
     
     private ServiceConnection serviceConnection = new AudioPlayerServiceConnection();
     private static AudioPlayer audioPlayer;
@@ -58,7 +55,7 @@ public class MyMediaPlayer extends TabActivity {
         
         tabHost.setCurrentTab(0);
         
-
+        
         //bind to service
         audioPlayerIntent = new Intent(this, AudioPlayer.class);
         bindService(audioPlayerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
@@ -68,36 +65,6 @@ public class MyMediaPlayer extends TabActivity {
     protected void onDestroy() {
         super.onDestroy();
         unbindService(serviceConnection);
-    }
-    
-
-    private void getAlbums() {
-        String[] columns = {MediaStore.Audio.Albums._ID,
-                MediaStore.Audio.Albums.ARTIST,
-                MediaStore.Audio.Albums.ALBUM,
-                MediaStore.Audio.Albums.NUMBER_OF_SONGS};
-
-        Cursor managedQuery = managedQuery(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, columns, null, null, null);
-        if( managedQuery == null) {
-            textView.setText("no files found");
-            return;
-        }
-        
-        textView.append("\n--------------------------------\n");
-        StringBuilder sb = new StringBuilder();
-        int idColumn = managedQuery.getColumnIndex(MediaStore.Audio.Albums._ID);
-        int artistColumn = managedQuery.getColumnIndex(MediaStore.Audio.Albums.ARTIST);
-        int albumColumn = managedQuery.getColumnIndex(MediaStore.Audio.Albums.ALBUM);
-        int numberOfSongsColumn = managedQuery.getColumnIndex(MediaStore.Audio.Albums.NUMBER_OF_SONGS);
-        while( managedQuery.moveToNext()) {
-            int albumId = managedQuery.getInt(idColumn);
-            sb.append("id: ='").append(albumId).append("';");
-            sb.append("artist: ='").append(managedQuery.getString(artistColumn)).append("';");
-            sb.append("album: ='").append(managedQuery.getString(albumColumn)).append("';");
-            sb.append("songs: ='").append(managedQuery.getInt(numberOfSongsColumn)).append("'\n");
-        }
-        
-        textView.append(sb.toString());
     }
     
     public static AudioPlayer getAudioPlayer() {

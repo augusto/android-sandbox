@@ -51,7 +51,37 @@ public class MusicRepository {
         }
         
         return tracks;
-
     }
+    
+
+    private void getAlbums() {
+//        String[] columns = {MediaStore.Audio.Albums._ID,
+//                MediaStore.Audio.Albums.ARTIST,
+//                MediaStore.Audio.Albums.ALBUM,
+//                MediaStore.Audio.Albums.NUMBER_OF_SONGS};
+//
+//        Cursor managedQuery = managedQuery(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, columns, null, null, null);
+//        if( managedQuery == null) {
+//            textView.setText("no files found");
+//            return;
+//        }
+//        
+//        textView.append("\n--------------------------------\n");
+//        StringBuilder sb = new StringBuilder();
+//        int idColumn = managedQuery.getColumnIndex(MediaStore.Audio.Albums._ID);
+//        int artistColumn = managedQuery.getColumnIndex(MediaStore.Audio.Albums.ARTIST);
+//        int albumColumn = managedQuery.getColumnIndex(MediaStore.Audio.Albums.ALBUM);
+//        int numberOfSongsColumn = managedQuery.getColumnIndex(MediaStore.Audio.Albums.NUMBER_OF_SONGS);
+//        while( managedQuery.moveToNext()) {
+//            int albumId = managedQuery.getInt(idColumn);
+//            sb.append("id: ='").append(albumId).append("';");
+//            sb.append("artist: ='").append(managedQuery.getString(artistColumn)).append("';");
+//            sb.append("album: ='").append(managedQuery.getString(albumColumn)).append("';");
+//            sb.append("songs: ='").append(managedQuery.getInt(numberOfSongsColumn)).append("'\n");
+//        }
+//        
+//        textView.append(sb.toString());
+    }
+
     
 }

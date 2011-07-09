@@ -7,16 +7,20 @@ import java.util.TimerTask;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.augusto.mymediaplayer.model.Track;
 import com.augusto.mymediaplayer.services.AudioPlayer;
@@ -78,8 +82,32 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
     
     @Override
     protected void onDestroy() {
-        
         super.onDestroy();
+    }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.play_queue_menu, menu);
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+        case R.id.exit:
+            Log.d(TAG, "Exiting application");
+            Intent audioPlayerIntent = new Intent(getApplicationContext(), AudioPlayer.class);
+            stopService(audioPlayerIntent);
+            finish();
+            break;
+        case R.id.clear_all:
+            Toast.makeText(this, "to implement", Toast.LENGTH_LONG).show();
+            break;
+        default:
+            Log.e(TAG, "Menu item not recognized. FeatureId=" + item.getItemId());
+        }
+        
+        return true;
     }
     
     private void updateScreenAsync() {
@@ -174,7 +202,6 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
                 }
                 try {
                     Thread.sleep(250);
-                    Log.d(TAG,"AsyncTask sleep");
                 } catch (InterruptedException e) { }
             }
             

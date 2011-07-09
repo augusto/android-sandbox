@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
@@ -13,6 +15,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.augusto.mymediaplayer.R;
 import com.augusto.mymediaplayer.model.Track;
 
 public class AudioPlayer extends Service implements OnCompletionListener {
@@ -52,6 +55,15 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         Log.i(TAG, "AudioPlayer: onDestroy() called");
      
         release();
+    }
+    
+    @Override
+    public void onLowMemory() {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        String message = getString(R.string.closing_low_memory);
+        Notification notification = new Notification(android.R.drawable.ic_dialog_alert, message, System.currentTimeMillis());
+        notificationManager.notify(1, notification);
+        stopSelf();
     }
 
     public void onCompletion(MediaPlayer _mediaPlayer) {

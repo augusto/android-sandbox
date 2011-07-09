@@ -9,4 +9,8 @@
     <string name="stop">stop</string>
     <string name="queue">queue</string>
     <string name="close">close</string>
+    
+    <string name="closing_low_memory">Closing player as the system is running low on memory</string>
+    <string name="exit">exit</string>
+    <string name="clear_all">Clear Playlist</string>
 </resources>
