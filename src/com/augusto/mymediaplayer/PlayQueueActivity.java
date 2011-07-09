@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +38,7 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
     private Button stop;
     private Button close;
     private Button playPause;
+    private ProgressBar timeLine;
     private View nonEmptyQueueView;
     private UpdateCurrentTrackTask updateCurrentTrackTask;
     
@@ -52,6 +54,7 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         stop = (Button)findViewById(R.id.stop);
         close = (Button)findViewById(R.id.close);
         playPause = (Button)findViewById(R.id.playPause);
+        timeLine = (ProgressBar) findViewById(R.id.time_line);
         
         stop.setOnClickListener(this);
         close.setOnClickListener(this);
@@ -212,7 +215,14 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         
         @Override
         protected void onProgressUpdate(Track... track) {
-            String message = track[0].getTitle() + " - " + getDurationAsMinsSecs(audioPlayer().elapsed()); 
+            if( stopped ) {
+                return; //to avoid glitches
+            }
+            
+            int elapsedMillis = audioPlayer().elapsed();
+            String message = track[0].getTitle() + " - " + getDurationAsMinsSecs(elapsedMillis);
+            timeLine.setMax(track[0].getDuration());
+            timeLine.setProgress(elapsedMillis);
             PlayQueueActivity.this.elapsed.setText(message);
         }
 

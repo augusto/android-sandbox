@@ -9,10 +9,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.widget.TabHost;
-import android.widget.Toast;
 
 import com.augusto.mymediaplayer.services.AudioPlayer;
 
