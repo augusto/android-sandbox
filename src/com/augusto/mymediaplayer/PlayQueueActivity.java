@@ -21,10 +21,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.augusto.mymediaplayer.common.Formatter;
+import com.augusto.mymediaplayer.common.ThreadUtil;
 import com.augusto.mymediaplayer.model.Track;
 import com.augusto.mymediaplayer.services.AudioPlayer;
 
@@ -40,7 +42,7 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
     private Button stop;
     private Button close;
     private Button playPause;
-    private ProgressBar timeLine;
+    private SeekBar timeLine;
     private View nonEmptyQueueView;
     private UpdateCurrentTrackTask updateCurrentTrackTask;
     
@@ -58,7 +60,8 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         stop = (Button)findViewById(R.id.stop);
         close = (Button)findViewById(R.id.close);
         playPause = (Button)findViewById(R.id.playPause);
-        timeLine = (ProgressBar) findViewById(R.id.time_line);
+        timeLine = (SeekBar) findViewById(R.id.time_line);
+        timeLine.setOnSeekBarChangeListener(new TimeLineChangeListener());
         
         stop.setOnClickListener(this);
         close.setOnClickListener(this);
@@ -204,21 +207,36 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
     private AudioPlayer audioPlayer() {
         return MyMediaPlayer.getAudioPlayer();
     }
+
+
+    private void updatePlayPanel(final Track track) {
+        runOnUiThread(new Runnable() {
+            
+            public void run() {
+                int elapsedMillis = audioPlayer().elapsed();
+                String message = track.getTitle() + " - " + Formatter.formatTimeFromMillis(elapsedMillis);
+                timeLine.setMax(track.getDuration());
+                timeLine.setProgress(elapsedMillis);
+                PlayQueueActivity.this.elapsed.setText(message);
+            }
+        });
+    }
     
     private class UpdateCurrentTrackTask extends AsyncTask<Void, Track, Void> {
 
         public boolean stopped = false;
+        public boolean paused = false;
         
         @Override
         protected Void doInBackground(Void... params) {
             while( ! stopped ) {
-                Track currentTrack = audioPlayer().getCurrentTrack();
-                if( currentTrack != null ) {
-                    publishProgress(currentTrack);
+                if( ! paused) {
+                    Track currentTrack = audioPlayer().getCurrentTrack();
+                    if( currentTrack != null ) {
+                        publishProgress(currentTrack);
+                    }
                 }
-                try {
-                    Thread.sleep(250);
-                } catch (InterruptedException e) { }
+                ThreadUtil.sleep(250);
             }
             
             Log.d(TAG,"AsyncTask stopped");
@@ -228,27 +246,23 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         
         @Override
         protected void onProgressUpdate(Track... track) {
-            if( stopped ) {
+            if( stopped || paused ) {
                 return; //to avoid glitches
             }
             
-            int elapsedMillis = audioPlayer().elapsed();
-            String message = track[0].getTitle() + " - " + getDurationAsMinsSecs(elapsedMillis);
-            timeLine.setMax(track[0].getDuration());
-            timeLine.setProgress(elapsedMillis);
-            PlayQueueActivity.this.elapsed.setText(message);
+            updatePlayPanel(track[0]);
         }
 
         public void stop() {
             stopped = true;
         }
         
-        NumberFormat numberFormat = new DecimalFormat("00");
-        public String getDurationAsMinsSecs(int duration) {
-            int minutes = duration/60000;
-            int seconds = (duration%60000)/1000;
-            
-            return numberFormat.format(minutes) + ":" + numberFormat.format(seconds);
+        public void pause() {
+            this.paused = true;
+        }
+
+        public void unPause() {
+            this.paused = false;
         }
     }
     
@@ -262,4 +276,47 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
             }
         }
     }
+    
+    private class TimeLineChangeListener implements SeekBar.OnSeekBarChangeListener {
+        private Timer delayedSeekTimer;
+        
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if( fromUser ) {
+                Log.d(TAG,"TimeLineChangeListener progress received from user: "+progress);
+                
+                scheduleSeek(progress);
+                
+                return;
+            }
+        }
+
+        
+        private void scheduleSeek(final int  progress) {
+            if( delayedSeekTimer != null) {
+                delayedSeekTimer.cancel();
+            }
+            delayedSeekTimer = new Timer();
+            delayedSeekTimer.schedule(new TimerTask() {
+                
+                @Override
+                public void run() {
+                    Log.d(TAG,"Delayed Seek Timer run");
+                    audioPlayer().seek(progress);
+                    updatePlayPanel(audioPlayer().getCurrentTrack());
+                }
+            }, 170);
+        }
+
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            Log.d(TAG,"TimeLineChangeListener started tracking touch");
+            updateCurrentTrackTask.pause();
+        }
+
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            Log.d(TAG,"TimeLineChangeListener stopped tracking touch");
+            updateCurrentTrackTask.unPause();
+        }
+        
+    }
 }
+

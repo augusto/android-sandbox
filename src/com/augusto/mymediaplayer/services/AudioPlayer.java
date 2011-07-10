@@ -176,4 +176,10 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         }
         return mediaPlayer.getCurrentPosition();
     }
+
+    public void seek(int timeInMillis) {
+        if(mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.seekTo(timeInMillis);
+        }
+    }
 }

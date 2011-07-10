@@ -1,10 +1,10 @@
 package com.augusto.mymediaplayer.model;
 
 import java.io.File;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
 import android.net.Uri;
+
+import com.augusto.mymediaplayer.common.Formatter;
 
 public class Track {
 
@@ -64,12 +64,8 @@ public class Track {
         this.display = display;
     }
 
-    NumberFormat numberFormat = new DecimalFormat("00");
     public String getDurationAsMinsSecs() {
-        int minutes = duration/60000;
-        int seconds = (duration%60000)/1000;
-        
-        return numberFormat.format(minutes) + ":" + numberFormat.format(seconds);
+        return Formatter.formatTimeFromMillis(duration);
     }
 
     public Uri asUri() {
