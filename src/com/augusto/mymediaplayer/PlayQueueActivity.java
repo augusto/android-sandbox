@@ -1,18 +1,19 @@
 package com.augusto.mymediaplayer;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -47,6 +48,9 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
     private UpdateCurrentTrackTask updateCurrentTrackTask;
     
     private BroadcastReceiver audioPlayerBroadcastReceiver = new AudioPlayerBroadCastReceiver();
+    private ServiceConnection serviceConnection = new AudioPlayerServiceConnection();
+    private AudioPlayer audioPlayer;
+    private Intent audioPlayerIntent;
     
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,17 +70,22 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         stop.setOnClickListener(this);
         close.setOnClickListener(this);
         playPause.setOnClickListener(this);
-
+        
+        //bind to service
+        audioPlayerIntent = new Intent(this, AudioPlayer.class);
+        bindService(audioPlayerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
-    private void refreshScreen() {
-        if( audioPlayer() == null) {
-            updateScreenAsync();
-        } else {
-            updatePlayQueue();
-        }
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	audioPlayerBroadcastReceiver = new AudioPlayerBroadCastReceiver();
+        IntentFilter filter = new IntentFilter(AudioPlayer.UPDATE_PLAYLIST);
+        registerReceiver(audioPlayerBroadcastReceiver, filter );
+        
+        refreshScreen();
     }
-
+    
     @Override
     protected void onPause() {
         unregisterReceiver(audioPlayerBroadcastReceiver);
@@ -87,20 +96,21 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         super.onPause();
     }
     
-    @Override
-    protected void onResume() {
-        audioPlayerBroadcastReceiver = new AudioPlayerBroadCastReceiver();
-        IntentFilter filter = new IntentFilter(AudioPlayer.UPDATE_PLAYLIST);
-        registerReceiver(audioPlayerBroadcastReceiver, filter );
-        
-        refreshScreen();
-        super.onResume();
-    }
     
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+    	unbindService(serviceConnection);
+    	super.onDestroy();
     }
+    
+    private void refreshScreen() {
+        if( audioPlayer == null) {
+            updateScreenAsync();
+        } else {
+            updatePlayQueue();
+        }
+    }
+
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -132,7 +142,7 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
             
             public void run() {
                 Log.d(TAG,"updateScreenAsync running timmer");
-                if( audioPlayer() != null) {
+                if( audioPlayer != null) {
                     waitForAudioPlayertimer.cancel();
                     handler.post( new Runnable() {
                         public void run() {
@@ -145,7 +155,7 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
     }
 
     public void updatePlayQueue() {
-        Track[] queuedTracks = audioPlayer().getQueuedTracks();
+        Track[] queuedTracks = audioPlayer.getQueuedTracks();
         Log.d(TAG,"Queuedtracks (number): " + queuedTracks.length);
         
         if( queuedTracks.length == 0) {
@@ -175,7 +185,7 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
             onClickPlayPause();
             break;
         case R.id.stop:
-            audioPlayer().stop();
+            audioPlayer.stop();
             updatePlayPauseButtonState();
             break;
         case R.id.close:
@@ -185,10 +195,10 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
     }
 
     private void onClickPlayPause() {
-        if( audioPlayer().isPlaying() ) {
-            audioPlayer().pause();
+        if( audioPlayer.isPlaying() ) {
+            audioPlayer.pause();
         } else {
-            audioPlayer().play();
+            audioPlayer.play();
         }
 
         updatePlayPauseButtonState();
@@ -197,15 +207,11 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
     
     
     private void updatePlayPauseButtonState() {
-        if( audioPlayer().isPlaying() ) {
+        if( audioPlayer.isPlaying() ) {
             playPause.setText(R.string.pause);
         } else {
             playPause.setText(R.string.play);
         }
-    }
-
-    private AudioPlayer audioPlayer() {
-        return MyMediaPlayer.getAudioPlayer();
     }
 
 
@@ -213,7 +219,7 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         runOnUiThread(new Runnable() {
             
             public void run() {
-                int elapsedMillis = audioPlayer().elapsed();
+                int elapsedMillis = audioPlayer.elapsed();
                 String message = track.getTitle() + " - " + Formatter.formatTimeFromMillis(elapsedMillis);
                 timeLine.setMax(track.getDuration());
                 timeLine.setProgress(elapsedMillis);
@@ -231,7 +237,7 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         protected Void doInBackground(Void... params) {
             while( ! stopped ) {
                 if( ! paused) {
-                    Track currentTrack = audioPlayer().getCurrentTrack();
+                    Track currentTrack = audioPlayer.getCurrentTrack();
                     if( currentTrack != null ) {
                         publishProgress(currentTrack);
                     }
@@ -301,8 +307,8 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
                 @Override
                 public void run() {
                     Log.d(TAG,"Delayed Seek Timer run");
-                    audioPlayer().seek(progress);
-                    updatePlayPanel(audioPlayer().getCurrentTrack());
+                    audioPlayer.seek(progress);
+                    updatePlayPanel(audioPlayer.getCurrentTrack());
                 }
             }, 170);
         }
@@ -317,6 +323,19 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
             updateCurrentTrackTask.unPause();
         }
         
+    }
+    
+    private final class AudioPlayerServiceConnection implements ServiceConnection {
+        public void onServiceConnected(ComponentName className, IBinder baBinder) {
+            Log.d(TAG,"AudioPlayerServiceConnection: Service connected");
+            audioPlayer = ((AudioPlayer.AudioPlayerBinder) baBinder).getService();
+            startService(audioPlayerIntent);
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            Log.d(TAG,"AudioPlayerServiceConnection: Service disconnected");
+            audioPlayer = null;
+        }
     }
 }
 

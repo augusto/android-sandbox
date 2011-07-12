@@ -1,16 +1,20 @@
 package com.augusto.mymediaplayer;
 
 import android.app.ListActivity;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -20,28 +24,43 @@ import android.widget.Toast;
 
 import com.augusto.mymediaplayer.model.Track;
 import com.augusto.mymediaplayer.repositories.MusicRepository;
+import com.augusto.mymediaplayer.services.AudioPlayer;
 
 public class BrowseActivity extends ListActivity {
     private static final String TAG = "BrowseActivity";
-    private Track[] tracks;
+    private Track[] tracks = new Track[0];
     private LayoutInflater layoutInflater;
     
+    private ServiceConnection serviceConnection = new AudioPlayerServiceConnection();
+    private AudioPlayer audioPlayer;
+    private Intent audioPlayerIntent;
+    
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
         layoutInflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         Log.d(TAG, "this: " + this);
         Log.d(TAG, "base: " + this.getBaseContext());
-                
+        
         MusicRepository musicRepository = new MusicRepository();
-        
-        tracks = musicRepository.getAllTracks(this);
-        
+    	tracks = musicRepository.getAllTracks(this);
+    	
         ListAdapter adapter = new TracksListAdapter(tracks,layoutInflater);
         setListAdapter(adapter);
         
         list = (ListView)findViewById(android.R.id.list);
         registerForContextMenu(list);
+        
+        //bind to service
+        audioPlayerIntent = new Intent(this, AudioPlayer.class);
+        bindService(audioPlayerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+    
+    @Override
+    protected void onDestroy() {
+    	unbindService(serviceConnection);
+    	super.onDestroy();
     }
     
     
@@ -92,13 +111,13 @@ public class BrowseActivity extends ListActivity {
     }
     
     private void playTrack(Track track) {
-        MyMediaPlayer.getAudioPlayer().play(track);
+        audioPlayer.play(track);
         
         notify(track);
     }
 
     private void addTrack(Track track) {
-        MyMediaPlayer.getAudioPlayer().addTrack(track);
+        audioPlayer.addTrack(track);
         
         notify(track);
     }
@@ -128,5 +147,18 @@ public class BrowseActivity extends ListActivity {
         // Another option is to render it with vertical text, from bottom to top.
         //toast.setGravity(Gravity.TOP |Gravity.CENTER_HORIZONTAL, 0, -10);
         toast.show();
+    }
+    
+    private final class AudioPlayerServiceConnection implements ServiceConnection {
+        public void onServiceConnected(ComponentName className, IBinder baBinder) {
+            Log.d(TAG,"AudioPlayerServiceConnection: Service connected");
+            audioPlayer = ((AudioPlayer.AudioPlayerBinder) baBinder).getService();
+            startService(audioPlayerIntent);
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            Log.d(TAG,"AudioPlayerServiceConnection: Service disconnected");
+            audioPlayer = null;
+        }
     }
 }

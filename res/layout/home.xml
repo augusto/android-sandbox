@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="fill_parent" 
+	android:layout_width="fill_parent"
+	android:id="@+id/tableLayout1"
+	android:stretchColumns="*">
+	
+	<TableRow android:id="@+id/tableRow1">
+		
+		<Button android:id="@+id/play_queue"
+			android:text="@string/play_queue" 
+			android:width="50dip" 
+			android:layout_margin="15dip" 
+			android:paddingTop="30dip"
+			android:paddingBottom="30dip"/>
+			
+		 <Button android:id="@+id/browse_all"
+			android:text="@string/browse_all" 
+			android:width="50dip"
+			android:layout_margin="15dip"
+			android:paddingTop="30dip"
+			android:paddingBottom="30dip"/>
+	</TableRow>
+
+
+	<TableRow android:id="@+id/tableRow2">
+		
+		<Button android:id="@+id/c21"
+			android:text="@string/play_queue" 
+			android:width="50dip" 
+			android:layout_margin="15dip" 
+			android:paddingTop="30dip"
+			android:paddingBottom="30dip"/>
+			
+		 <Button android:id="@+id/c22"
+			android:text="@string/browse_all" 
+			android:width="50dip"
+			android:layout_margin="15dip"
+			android:paddingTop="30dip"
+			android:paddingBottom="30dip"/>
+	</TableRow>
+	
+		<TableRow android:id="@+id/tableRow2">
+		
+		<Button android:id="@+id/c31"
+			android:text="@string/play_queue" 
+			android:width="50dip" 
+			android:layout_margin="15dip" 
+			android:paddingTop="30dip"
+			android:paddingBottom="30dip"/>
+			
+		 <Button android:id="@+id/c32"
+			android:text="@string/browse_all" 
+			android:width="50dip"
+			android:layout_margin="15dip"
+			android:paddingTop="30dip"
+			android:paddingBottom="30dip"/>
+	</TableRow>
+</TableLayout>
+
