@@ -17,13 +17,18 @@ import android.widget.Toast;
 
 import com.augusto.mymediaplayer.R;
 import com.augusto.mymediaplayer.model.Track;
+import com.augusto.mymediaplayer.repositories.MusicRepository;
 
 public class AudioPlayer extends Service implements OnCompletionListener {
-    public static final String UPDATE_PLAYLIST = "com.augusto.mymediaplayer.AudioPlayer.PLAYLIST_UPDATED";
+	public static final String INTENT_BASE_NAME = "com.augusto.mymediaplayer.AudioPlayer";
+    public static final String UPDATE_PLAYLIST = INTENT_BASE_NAME + ".PLAYLIST_UPDATED";
+	public static final String QUEUE_ALBUM = INTENT_BASE_NAME + ".QUEUE_ALBUM";
+	public static final String PLAY_ALBUM = INTENT_BASE_NAME + ".PLAY_ALBUM";
 
     private final String TAG = "AudioPlayer";
 
-    private List<Track> tracks = new ArrayList<Track>();
+    private List<Track> tracks = new ArrayList<Track>(); // this collection should be encapsulated in another class.
+    private MusicRepository musicRepository = new MusicRepository();
     private MediaPlayer mediaPlayer;
     private boolean paused = false;
 
@@ -49,10 +54,40 @@ public class AudioPlayer extends Service implements OnCompletionListener {
 
     @Override
     public void onStart(Intent intent, int startId) {
-        Log.i(TAG, "AudioPlayer: onStart() called");
+        Log.i(TAG, "AudioPlayer: onStart() called, instance=" + this.hashCode());
+        
+        String action = intent.getAction();
+        if( PLAY_ALBUM.equals(action)) {
+        	long albumId = intent.getLongExtra("id", -1);
+        	Log.d(TAG, "Received intent to play album: " + albumId);
+        	playAlbum(albumId);
+        } else if( QUEUE_ALBUM.equals(action)) {
+        	long albumId = intent.getLongExtra("id", -1);
+        	Log.d(TAG, "Received intent to queue album: " + albumId);
+        	queueAlbum(albumId);
+        } else {
+        	Log.d(TAG, "Action not recognized: " + action);
+        }
     }
 
-    @Override
+    private void playAlbum(long albumId) {
+    	Track[] tracks = musicRepository.findTracksFilteredBy(this, albumId);
+    	this.tracks.clear(); // I DON'T LIKE THIS!!!
+    	stop();
+    	for( Track track : tracks) {
+    		this.tracks.add(track);
+    	}
+    	play();
+	}
+
+	private void queueAlbum(long albumId) {
+    	Track[] tracks = musicRepository.findTracksFilteredBy(this, albumId);
+    	for( Track track : tracks) {
+    		addTrack(track);
+    	}
+	}
+
+	@Override
     public void onDestroy() {
         Log.i(TAG, "AudioPlayer: onDestroy() called");
      

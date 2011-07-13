@@ -1,14 +1,13 @@
 package com.augusto.mymediaplayer.model;
 
 import java.io.File;
-
 import android.net.Uri;
 
 import com.augusto.mymediaplayer.common.Formatter;
 
 public class Track {
 
-    private final int id;
+    private final long id;
     private String artist;
     private String title;
     private int trackNumber;
@@ -16,11 +15,11 @@ public class Track {
     private String path;
     private String display;
 
-    public Track(int id) {
+    public Track(long id) {
         this.id = id;
     }
     
-    public int getId() {
+    public long getId() {
         return id;
     }
     

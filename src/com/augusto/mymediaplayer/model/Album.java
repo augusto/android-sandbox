@@ -2,17 +2,17 @@ package com.augusto.mymediaplayer.model;
 
 public class Album {
 
-    private final int id;
+    private final long id;
     private String artist;
     private String title;
     private int trackCount;
     
 
-    public Album(int id) {
+    public Album(long id) {
         this.id = id;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
     

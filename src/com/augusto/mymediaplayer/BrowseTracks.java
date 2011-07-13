@@ -26,7 +26,7 @@ import com.augusto.mymediaplayer.model.Track;
 import com.augusto.mymediaplayer.repositories.MusicRepository;
 import com.augusto.mymediaplayer.services.AudioPlayer;
 
-public class BrowseAll extends ListActivity {
+public class BrowseTracks extends ListActivity {
     private static final String TAG = "BrowseActivity";
     private Track[] tracks = new Track[0];
     private LayoutInflater layoutInflater;
@@ -34,6 +34,8 @@ public class BrowseAll extends ListActivity {
     private ServiceConnection serviceConnection = new AudioPlayerServiceConnection();
     private AudioPlayer audioPlayer;
     private Intent audioPlayerIntent;
+    
+    private Long albumId;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,8 +45,10 @@ public class BrowseAll extends ListActivity {
         Log.d(TAG, "this: " + this);
         Log.d(TAG, "base: " + this.getBaseContext());
         
+        albumId = getIntentAlbumId();
+        
         MusicRepository musicRepository = new MusicRepository();
-    	tracks = musicRepository.getAllTracks(this);
+    	tracks = musicRepository.findTracksFilteredBy(this, albumId);
     	
         ListAdapter adapter = new TrackListAdapter(tracks,layoutInflater);
         setListAdapter(adapter);
@@ -57,7 +61,17 @@ public class BrowseAll extends ListActivity {
         bindService(audioPlayerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
     
-    @Override
+    private Long getIntentAlbumId() {
+    	long albumId = getIntent().getLongExtra("album_id", -1);
+        
+    	if(albumId < 0) {
+        	return null;
+        }
+        
+        return albumId;
+	}
+
+	@Override
     protected void onDestroy() {
     	unbindService(serviceConnection);
     	super.onDestroy();

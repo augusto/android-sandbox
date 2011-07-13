@@ -54,7 +54,7 @@ public class Home extends Activity implements OnClickListener {
 			activityClass = PlayQueueActivity.class;
 			break;
 		case R.id.browse_all:
-			activityClass = BrowseAll.class;
+			activityClass = BrowseTracks.class;
 			break;
         case R.id.browse_albums:
             activityClass = BrowseAlbums.class;

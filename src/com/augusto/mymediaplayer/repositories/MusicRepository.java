@@ -1,16 +1,15 @@
 package com.augusto.mymediaplayer.repositories;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
-import android.util.Log;
 
 import com.augusto.mymediaplayer.model.Album;
 import com.augusto.mymediaplayer.model.Track;
 
 public class MusicRepository {
-    private final static String TAG = "MusicRepository";
-
     private static final Track[] NO_TRACKS_FOUND = new Track[0];
     private static final Album[] NO_ALBUMS_FOUND = new Album[0];
     
@@ -30,9 +29,19 @@ public class MusicRepository {
         MediaStore.Audio.Albums.NUMBER_OF_SONGS};
 
     
-    public Track[] getAllTracks(Activity activity) {
-        
-        Cursor cursor = activity.managedQuery(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, TRACK_COLUMNS, null, null, null);
+	public Track[] findTracksFilteredBy(Context context, Long albumId) {
+		
+		String where = null;
+		String[] selectionArgs = null;
+		String orderBy = MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
+		if( albumId != null) {
+			where = MediaStore.Audio.Media.ALBUM_ID + " = ?";
+			selectionArgs = new String[]{ albumId.toString() };
+			orderBy = MediaStore.Audio.Media.TRACK;
+		}
+
+    	ContentResolver contentResolver = context.getContentResolver();
+		Cursor cursor = contentResolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, TRACK_COLUMNS, where, selectionArgs, orderBy);
         
         if( cursor == null) {
             return NO_TRACKS_FOUND;
@@ -49,7 +58,7 @@ public class MusicRepository {
         Track[] tracks = new Track[cursor.getCount()];
         int index = 0;
         while( cursor.moveToNext()) {
-            Track track = new Track(cursor.getInt(idColumn));
+            Track track = new Track(cursor.getLong(idColumn));
             track.setTitle(cursor.getString(titleColumn));
             track.setArtist(cursor.getString(artistColumn));
             track.setDuration(cursor.getInt(durationColumn));
@@ -60,14 +69,31 @@ public class MusicRepository {
             tracks[index++] = track;
         }
         
+        cursor.close();
         return tracks;
-    }
-    
+	}
 
-    public Album[] getAllAlbums(Activity activity) {
+	public Album findAlbumById(Activity activity, Long albumId) {
 
+		Album[] albums = findAlbumsFilteredBy(activity, albumId);
+	
+		if( albums.length > 0) {
+			return null;
+		}
+		
+		return albums[0];
+	}
 
-        Cursor cursor = activity.managedQuery(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, ALBUM_COLUMNS, null, null, null);
+	private Album[] findAlbumsFilteredBy(Context context, Long albumId) {
+		String where = null;
+		String[] selectionArgs = null;
+		if( albumId != null ) {
+			where = MediaStore.Audio.Albums._ID + " = ?";
+			selectionArgs = new String[]{ albumId.toString()};
+		}
+		
+		ContentResolver contentResolver = context.getContentResolver();
+        Cursor cursor = contentResolver.query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, ALBUM_COLUMNS, where, selectionArgs, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
         if (cursor == null) {
             return NO_ALBUMS_FOUND;
         }
@@ -80,14 +106,21 @@ public class MusicRepository {
         Album[] albums = new Album[cursor.getCount()];
         int index = 0;
         while (cursor.moveToNext()) {
-            Album album = new Album( cursor.getInt(idColumn));
+            Album album = new Album( cursor.getLong(idColumn));
             album.setArtist( cursor.getString(artistColumn));
             album.setTitle( cursor.getString(albumColumn));
             album.setTrackCount( cursor.getInt(trackCountColumn));
             
             albums[index++] = album;
         }
+        
+        cursor.close();
         return albums;
+	}
+	
+
+    public Album[] findAllAlbums(Activity activity) {
+    	return findAlbumsFilteredBy(activity, null);
     }
-    
+
 }
