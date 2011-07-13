@@ -70,15 +70,15 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         stop.setOnClickListener(this);
         close.setOnClickListener(this);
         playPause.setOnClickListener(this);
-        
-        //bind to service
-        audioPlayerIntent = new Intent(this, AudioPlayer.class);
-        bindService(audioPlayerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onResume() {
-    	super.onResume();
+        super.onResume();
+        //bind to service
+        audioPlayerIntent = new Intent(this, AudioPlayer.class);
+        bindService(audioPlayerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+    	
     	audioPlayerBroadcastReceiver = new AudioPlayerBroadCastReceiver();
         IntentFilter filter = new IntentFilter(AudioPlayer.UPDATE_PLAYLIST);
         registerReceiver(audioPlayerBroadcastReceiver, filter );
@@ -93,24 +93,16 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         
         updateCurrentTrackTask.stop();
         updateCurrentTrackTask = null;
+        
+        unbindService(serviceConnection);
         super.onPause();
     }
     
     
     @Override
     protected void onDestroy() {
-    	unbindService(serviceConnection);
     	super.onDestroy();
     }
-    
-    private void refreshScreen() {
-        if( audioPlayer == null) {
-            updateScreenAsync();
-        } else {
-            updatePlayQueue();
-        }
-    }
-
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -135,6 +127,14 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         }
         
         return true;
+    }
+
+    private void refreshScreen() {
+        if( audioPlayer == null) {
+            updateScreenAsync();
+        } else {
+            updatePlayQueue();
+        }
     }
     
     private void updateScreenAsync() {
@@ -165,7 +165,7 @@ public class PlayQueueActivity extends Activity implements OnClickListener {
         } else {
             message.setVisibility(View.GONE);
             message.setText("Tracks found: " + queuedTracks.length);
-            queue.setAdapter(new TracksListAdapter(queuedTracks, layoutInflater));
+            queue.setAdapter(new TrackListAdapter(queuedTracks, layoutInflater));
             nonEmptyQueueView.setVisibility(View.VISIBLE);
         }
         

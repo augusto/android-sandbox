@@ -26,8 +26,8 @@
 
 	<TableRow android:id="@+id/tableRow2">
 		
-		<Button android:id="@+id/c21"
-			android:text="@string/play_queue" 
+		<Button android:id="@+id/browse_albums"
+			android:text="@string/browse_albums" 
 			android:width="50dip" 
 			android:layout_margin="15dip" 
 			android:paddingTop="30dip"

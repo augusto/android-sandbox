@@ -19,7 +19,8 @@
 	           <action android:name="com.augusto.mymediaplayer.AudioPlayer.PLAYLIST_UPDATED"/>
 	        </intent-filter>
         </activity>
-        <activity android:name=".BrowseActivity"/>
+        <activity android:name=".BrowseAll"/>
+        <activity android:name=".BrowseAlbums"/>
         <service android:name=".services.AudioPlayer"></service>
         
     </application>

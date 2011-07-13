@@ -11,6 +11,7 @@ public class Home extends Activity implements OnClickListener {
 	
 	private Button playQueue;
 	private Button browseAll;
+	private Button browseAlbums;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -19,9 +20,11 @@ public class Home extends Activity implements OnClickListener {
 		
 		playQueue = (Button) findViewById(R.id.play_queue);
 		browseAll = (Button) findViewById(R.id.browse_all);
+		browseAlbums = (Button) findViewById(R.id.browse_albums);
 		
 		playQueue.setOnClickListener(this);
 		browseAll.setOnClickListener(this);
+		browseAlbums.setOnClickListener(this);
 	}
 	
 	@Override
@@ -51,8 +54,11 @@ public class Home extends Activity implements OnClickListener {
 			activityClass = PlayQueueActivity.class;
 			break;
 		case R.id.browse_all:
-			activityClass = BrowseActivity.class;
+			activityClass = BrowseAll.class;
 			break;
+        case R.id.browse_albums:
+            activityClass = BrowseAlbums.class;
+            break;
 		}
 		
 		

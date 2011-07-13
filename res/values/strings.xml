@@ -16,4 +16,5 @@
     
     <string name="play_queue">Play queue</string>
     <string name="browse_all">Browse All</string>
+    <string name="browse_albums">Browse Albums</string>
 </resources>
