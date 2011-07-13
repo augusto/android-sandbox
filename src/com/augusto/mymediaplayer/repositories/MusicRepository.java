@@ -28,8 +28,22 @@ public class MusicRepository {
         MediaStore.Audio.Albums.ALBUM, 
         MediaStore.Audio.Albums.NUMBER_OF_SONGS};
 
+
+    public Track findTracksId(Context context, long trackId) {
+        Track[] tracks = findTracks(context, trackId, null);
+        
+        if( tracks.length == 0) {
+            return null;
+        }
+        
+        return tracks[0];
+    }
     
-	public Track[] findTracksFilteredBy(Context context, Long albumId) {
+    public Track[] findTracksByAlbumId(Context context, Long albumId) {
+        return findTracks(context, null, albumId);
+    }
+    
+	private Track[] findTracks(Context context, Long trackId, Long albumId) {
 		
 		String where = null;
 		String[] selectionArgs = null;
@@ -38,6 +52,10 @@ public class MusicRepository {
 			where = MediaStore.Audio.Media.ALBUM_ID + " = ?";
 			selectionArgs = new String[]{ albumId.toString() };
 			orderBy = MediaStore.Audio.Media.TRACK;
+		} else if ( trackId != null ){
+            where = MediaStore.Audio.Media._ID + " = ?";
+            selectionArgs = new String[]{ trackId.toString() };
+            orderBy = MediaStore.Audio.Media.TRACK;
 		}
 
     	ContentResolver contentResolver = context.getContentResolver();
@@ -122,5 +140,4 @@ public class MusicRepository {
     public Album[] findAllAlbums(Activity activity) {
     	return findAlbumsFilteredBy(activity, null);
     }
-
 }

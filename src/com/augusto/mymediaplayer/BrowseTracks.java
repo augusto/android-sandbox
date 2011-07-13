@@ -48,7 +48,7 @@ public class BrowseTracks extends ListActivity {
         albumId = getIntentAlbumId();
         
         MusicRepository musicRepository = new MusicRepository();
-    	tracks = musicRepository.findTracksFilteredBy(this, albumId);
+    	tracks = musicRepository.findTracksByAlbumId(this, albumId);
     	
         ListAdapter adapter = new TrackListAdapter(tracks,layoutInflater);
         setListAdapter(adapter);
@@ -110,6 +110,7 @@ public class BrowseTracks extends ListActivity {
         
         Track track = tracks[info.position];
         
+        Intent intent;
         switch(itemId) {
         case R.string.play:
             playTrack(track);
@@ -125,13 +126,17 @@ public class BrowseTracks extends ListActivity {
     }
     
     private void playTrack(Track track) {
-        audioPlayer.play(track);
+        Intent intent = new Intent(AudioPlayer.PLAY_TRACK);
+        intent.putExtra("id", track.getId());
+        this.sendBroadcast(intent);
         
         notify(track);
     }
 
     private void addTrack(Track track) {
-        audioPlayer.addTrack(track);
+        Intent intent = new Intent(AudioPlayer.QUEUE_TRACK);
+        intent.putExtra("id", track.getId());
+        this.sendBroadcast(intent);
         
         notify(track);
     }

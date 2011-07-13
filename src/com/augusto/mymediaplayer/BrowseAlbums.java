@@ -95,15 +95,14 @@ public class BrowseAlbums extends ListActivity {
 	private void queueAlbum(Album album) {
 		Intent intent = new Intent(AudioPlayer.QUEUE_ALBUM);
 		intent.putExtra("id", album.getId());
-		this.startService(intent);
-		
+		//this.startService(intent);
+		this.sendBroadcast(intent);
 	}
 
 	private void playAlbum(Album album) {
 		Intent intent = new Intent(AudioPlayer.PLAY_ALBUM);
 		intent.putExtra("id", album.getId());
-		this.startService(intent);		
+		//this.startService(intent);
+		this.sendBroadcast(intent);
 	}
-
-
 }

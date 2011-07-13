@@ -21,12 +21,7 @@
         </activity>
         <activity android:name=".BrowseTracks"/>
         <activity android:name=".BrowseAlbums"/>
-        <service android:name=".services.AudioPlayer">
-	        <intent-filter >
-	        	<action android:name="com.augusto.mymediaplayer.AudioPlayer.PLAY_ALBUM"/>
-	        	<action android:name="com.augusto.mymediaplayer.AudioPlayer.QUEUE_ALBUM"/>
-    	    </intent-filter>
-        </service>
+        <service android:name=".services.AudioPlayer"/>
         
     </application>
 </manifest>
